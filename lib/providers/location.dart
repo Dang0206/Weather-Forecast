@@ -1,37 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:web_forecast_weather/models/forecast_info.dart';
-import 'package:web_forecast_weather/models/location_item.dart';
-import 'package:flutter/material.dart';
 import 'package:web_forecast_weather/services/api_service.dart';
-import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class WeatherProvider with ChangeNotifier {
   final WeatherService _service = WeatherService();
 
-  // Trạng thái
+
   ForecastInfo? _currentWeather;
   List<ForecastInfo> _forecastList = [];
   bool _isLoading = false;
   String? _error;
-
-  // Thành phố hiện tại
   String? _selectedCity;
 
-  // Getters
+  // 🔹 Lịch sử tìm kiếm (trong ngày)
+  final List<SearchHistoryItem> _searchHistory = [];
+  List<SearchHistoryItem> get searchHistory => List.unmodifiable(_searchHistory);
+
+  WeatherProvider() {
+    _loadHistory(); 
+  }
+
   ForecastInfo? get currentWeather => _currentWeather;
   List<ForecastInfo> get forecastList => _forecastList;
   bool get isLoading => _isLoading;
   String? get error => _error;
   String? get selectedCity => _selectedCity;
 
-  /// Chọn thành phố và tự động fetch dữ liệu
+ 
   void selectCity(String city) {
     _selectedCity = city;
     fetchWeather(city);
     notifyListeners();
   }
 
-  /// Lấy dữ liệu thời tiết theo tên thành phố
+
   Future<void> fetchWeather(String city) async {
     _isLoading = true;
     _error = null;
@@ -40,14 +45,21 @@ class WeatherProvider with ChangeNotifier {
     try {
       final data = await _service.fetchWeather(city);
 
-      // Lấy current
       _currentWeather = ForecastInfo.fromCurrentJson(data['current']);
-
-      // Lấy forecast 7 ngày
       final forecastDays = data['forecast']['forecastday'] as List;
       _forecastList = forecastDays
           .map((json) => ForecastInfo.fromForecastJson(json))
           .toList();
+
+      // 🔹 Lưu vào lịch sử
+      if (_currentWeather != null) {
+        final item = SearchHistoryItem(
+          city: _selectedCity ?? "Unknown",
+          weather: _currentWeather!,
+        );
+        _searchHistory.add(item);
+        _saveHistory(); // lưu xuống local
+      }
     } catch (e) {
       _error = e.toString();
     }
@@ -56,37 +68,68 @@ class WeatherProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Lấy dữ liệu thời tiết theo tọa độ
-  Future<void> fetchWeatherByCoordinates(double lat, double lon) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
 
-    try {
-      final data = await _service.fetchWeatherByCoordinates(lat, lon);
 
-      // Lấy current
-      _currentWeather = ForecastInfo.fromCurrentJson(data['current']);
+  /// 🔹 Lưu lịch sử vào SharedPreferences
+  Future<void> _saveHistory() async {
+    final prefs = await SharedPreferences.getInstance();
 
-      // Lấy forecast 7 ngày
-      final forecastDays = data['forecast']['forecastday'] as List;
-      _forecastList = forecastDays
-          .map((json) => ForecastInfo.fromForecastJson(json))
-          .toList();
-    } catch (e) {
-      _error = e.toString();
-    }
+    final today = DateTime.now();
+    final todayKey = "${today.year}-${today.month}-${today.day}";
 
-    _isLoading = false;
-    notifyListeners();
+    final historyJson = _searchHistory.map((e) => e.toJson()).toList();
+
+    await prefs.setString("history_date", todayKey);
+    await prefs.setString("search_history", jsonEncode(historyJson));
   }
 
-  /// Clear dữ liệu
-  void clear() {
-    _currentWeather = null;
-    _forecastList = [];
-    _selectedCity = null;
-    _error = null;
+  /// 🔹 Load lịch sử khi mở app
+  Future<void> _loadHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedDate = prefs.getString("history_date");
+    final savedHistory = prefs.getString("search_history");
+
+    final today = DateTime.now();
+    final todayKey = "${today.year}-${today.month}-${today.day}";
+
+    if (savedDate == todayKey && savedHistory != null) {
+      final List decoded = jsonDecode(savedHistory);
+      _searchHistory.clear();
+      _searchHistory.addAll(
+        decoded.map((e) => SearchHistoryItem.fromJson(e)),
+      );
+    } else {
+      // ngày mới → reset
+      _searchHistory.clear();
+      await prefs.remove("search_history");
+    }
+
     notifyListeners();
   }
 }
+
+class SearchHistoryItem {
+  final String city;
+  final ForecastInfo weather;
+
+  SearchHistoryItem({
+    required this.city,
+    required this.weather,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "city": city,
+      "weather": weather.toJsonFromCurrent(),
+    };
+  }
+
+  factory SearchHistoryItem.fromJson(Map<String, dynamic> json) {
+    return SearchHistoryItem(
+      city: json["city"],
+      weather: ForecastInfo.fromCurrentJson(json["weather"]),
+    );
+  }
+}
+
+

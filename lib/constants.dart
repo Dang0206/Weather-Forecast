@@ -13,20 +13,19 @@ var appBarColor = Colors.blue[900];
 var myAppBar = AppBar(
   backgroundColor: appBarColor,
   title: const Text(
-    'Weather Dashboard',
+    'Weather Dashboard by Son Giang Tran',
     style: TextStyle(
       fontWeight: FontWeight.bold,
       color: Colors.white,
     ),
   ),
   centerTitle: true,
-   actions: const [
-    Icon(
-      Icons.save,
-      color: Colors.white,
-    ),
-  ],
+
 );
+
+
+
+
 
 var tilePadding = const EdgeInsets.only(left: 8.0, right: 8, top: 8);
 
@@ -194,7 +193,7 @@ return ListTile(
   title: Text("${item.name}, ${item.country}"),
   subtitle: Text(item.region),
   onTap: () {
-    // Sử dụng Provider.of với listen: false
+    
     Provider.of<WeatherProvider>(context, listen: false).selectCity(item.name);
   },
 );
