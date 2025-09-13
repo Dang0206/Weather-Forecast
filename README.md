@@ -17,8 +17,6 @@ Show 4-day weather forecast and option to load more.
 
 Temporary weather history stored for the day (can re-display after reloading app).
 
-Email subscription system:
-
 Register email to receive daily forecast.
 
 Email confirmation required.
@@ -35,9 +33,9 @@ API Provider: WeatherAPI
 
 State Management: Provider
 
-Database/Storage: Local temporary storage for history
+Temporary weather history is stored locally using SharedPreferences.
 
-Authentication/Subscription: Firebase Authentication + Email service
+Authentication/Subscription: Firebase Authentication 
 
 Deployment: Firebase Hosting
 
