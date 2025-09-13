@@ -1,16 +1,65 @@
-# web_forecast_weather
+# 🌦 Weather Forecast Web App
 
-A new Flutter project.
 
-## Getting Started
+A Flutter Web Application that provides real-time weather information using WeatherAPI
+.
+Users can search for cities/countries, view current weather conditions, 4-day forecasts, and manage their daily forecast email subscriptions.
 
-This project is a starting point for a Flutter application.
+Deployed with Firebase Hosting.
 
-A few resources to get you started if this is your first Flutter project:
+🚀 Features:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Search weather by city/country
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Display current day weather: temperature, wind speed, humidity, condition, etc.
+
+Show 4-day weather forecast and option to load more.
+
+Temporary weather history stored for the day (can re-display after reloading app).
+
+Email subscription system:
+
+Register email to receive daily forecast.
+
+Email confirmation required.
+
+Ability to unsubscribe.
+
+Deployment on Firebase Hosting.
+
+🛠️ Technical Stack
+
+Frontend: Flutter (Dart)
+
+API Provider: WeatherAPI
+
+State Management: Provider
+
+Database/Storage: Local temporary storage for history
+
+Authentication/Subscription: Firebase Authentication + Email service
+
+Deployment: Firebase Hosting
+
+# You can run project step by step: 
+
+1.Install dependencies
+
+flutter pub get
+
+
+2.Run on web (Chrome)
+
+flutter run -d chrome
+
+
+3.Build web for deployment
+
+flutter build web
+
+
+4.Deploy to Firebase Hosting (if Firebase is already configured)
+
+firebase deploy
+# My video demo: 
+https://youtu.be/jAX9ChUINTE
