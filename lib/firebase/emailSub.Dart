@@ -4,136 +4,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 
-// class EmailSubscriptionDialog extends StatefulWidget {
-//   const EmailSubscriptionDialog({Key? key}) : super(key: key);
-
-//   @override
-//   _EmailSubscriptionDialogState createState() => _EmailSubscriptionDialogState();
-// }
-
-// class _EmailSubscriptionDialogState extends State<EmailSubscriptionDialog> {
-//   final AuthService _authService = AuthService();
-//   final TextEditingController _emailController = TextEditingController();
-//   final TextEditingController _passwordController = TextEditingController();
-
-//   @override
-//   void dispose() {
-//     _emailController.dispose();
-//     _passwordController.dispose();
-//     super.dispose();
-//   }
-
-//   // Hàm xử lý đăng ký
-//   void _signUp() async {
-//     final email = _emailController.text.trim();
-//     final password = _passwordController.text.trim();
-
-//     if (email.isEmpty || password.isEmpty) {
-//       _showErrorDialog('Vui lòng nhập đầy đủ email và mật khẩu.');
-//       return;
-//     }
-
-//     String? errorMessage = await _authService.signUp(email, password);
-
-//     if (errorMessage != null) {
-//       // Đã có lỗi xảy ra
-//       _showErrorDialog(errorMessage);
-//     } else {
-//       // Thành công: thông báo cho người dùng
-//       _showSuccessDialog();
-//     }
-//   }
-
-//   // Hàm hiển thị dialog lỗi
-//   void _showErrorDialog(String message) {
-//     showDialog(
-//       context: context,
-//       builder: (ctx) => AlertDialog(
-//         title: const Text('Lỗi'),
-//         content: Text(message),
-//         actions: <Widget>[
-//           TextButton(
-//             child: const Text('OK'),
-//             onPressed: () {
-//               Navigator.of(ctx).pop();
-//             },
-//           )
-//         ],
-//       ),
-//     );
-//   }
-
-//   // Hàm hiển thị dialog thành công
-//   void _showSuccessDialog() {
-//     showDialog(
-//       context: context,
-//       builder: (ctx) => AlertDialog(
-//         title: const Text('Thành công!'),
-//         content: const Text('Một email xác thực đã được gửi đến bạn. Vui lòng kiểm tra hộp thư đến.'),
-//         actions: <Widget>[
-//           TextButton(
-//             child: const Text('OK'),
-//             onPressed: () {
-//               Navigator.of(ctx).pop();
-//               Navigator.of(context).pop(); // Đóng dialog đăng ký
-//             },
-//           )
-//         ],
-//       ),
-//     );
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return AlertDialog(
-//       title: const Text('Đăng ký để nhận dự báo thời tiết hàng ngày'),
-//       content: SingleChildScrollView(
-//         child: Column(
-//           children: <Widget>[
-//             const Text('Nhập email và mật khẩu để đăng ký tài khoản.'),
-//             const SizedBox(height: 16),
-//             TextField(
-//               controller: _emailController,
-//               decoration: const InputDecoration(
-//                 border: OutlineInputBorder(),
-//                 labelText: 'Email',
-//                 hintText: 'VD: email@example.com',
-//               ),
-//               keyboardType: TextInputType.emailAddress,
-//             ),
-//             const SizedBox(height: 12),
-//             TextField(
-//               controller: _passwordController,
-//               decoration: const InputDecoration(
-//                 border: OutlineInputBorder(),
-//                 labelText: 'Mật khẩu',
-//               ),
-//               obscureText: true,
-//             ),
-//           ],
-//         ),
-//       ),
-//       actions: <Widget>[
-//         TextButton(
-//           child: const Text('Hủy'),
-//           onPressed: () {
-//             Navigator.of(context).pop();
-//           },
-//         ),
-//         ElevatedButton(
-//           child: const Text('Đăng ký'),
-//           onPressed: _signUp, // Gọi hàm _signUp khi nhấn nút
-//         ),
-//       ],
-//     );
-//   }
-// }
-
-
-
 
 class EmailSubscriptionDialog extends StatefulWidget {
-  const EmailSubscriptionDialog({Key? key}) : super(key: key);
+  final bool isSubscribed;
+
+  const EmailSubscriptionDialog({
+    Key? key,
+    required this.isSubscribed,
+  }) : super(key: key);
 
   @override
   _EmailSubscriptionDialogState createState() =>
@@ -145,6 +23,15 @@ class _EmailSubscriptionDialogState extends State<EmailSubscriptionDialog> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  late bool _isSubscribed;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    _isSubscribed = widget.isSubscribed || _authService.currentUser != null;
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -152,12 +39,12 @@ class _EmailSubscriptionDialogState extends State<EmailSubscriptionDialog> {
     super.dispose();
   }
 
-  void _signUp() async {
+  Future<void> _signUp() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      _showErrorDialog('Vui lòng nhập đầy đủ email và mật khẩu.');
+      _showErrorDialog('Please enter full email and password.');
       return;
     }
 
@@ -166,19 +53,26 @@ class _EmailSubscriptionDialogState extends State<EmailSubscriptionDialog> {
     if (errorMessage != null) {
       _showErrorDialog(errorMessage);
     } else {
+      setState(() {
+        _isSubscribed = true;
+      });
       _showSuccessDialog(
-          'Một email xác thực đã được gửi đến bạn. Vui lòng kiểm tra hộp thư đến (Spam nếu không thấy).');
+          'A verification email has been sent to you. Please check your inbox. Spam if you do not see it.');
     }
   }
 
-  void _cancelSubscription() async {
+  Future<void> _cancelSubscription() async {
     String? result = await _authService.deleteUser();
     if (result != null) {
       _showErrorDialog(result);
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Đăng ký đã bị hủy.')));
-      Navigator.of(context).pop(); // đóng dialog
+      setState(() {
+        _isSubscribed = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Registration has been cancelled.')),
+      );
+      Navigator.of(context).pop();
     }
   }
 
@@ -186,11 +80,12 @@ class _EmailSubscriptionDialogState extends State<EmailSubscriptionDialog> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Lỗi'),
+        title: const Text('Error'),
         content: Text(message),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(ctx).pop(), child: const Text('OK'))
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('OK'))
         ],
       ),
     );
@@ -200,13 +95,13 @@ class _EmailSubscriptionDialogState extends State<EmailSubscriptionDialog> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Thành công'),
+        title: const Text('Success'),
         content: Text(message),
         actions: [
           TextButton(
               onPressed: () {
-                Navigator.of(ctx).pop(); // đóng dialog thành công
-                Navigator.of(context).pop(); // đóng dialog chính
+                Navigator.of(ctx).pop(); 
+                Navigator.of(context).pop(); 
               },
               child: const Text('OK'))
         ],
@@ -216,50 +111,56 @@ class _EmailSubscriptionDialogState extends State<EmailSubscriptionDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final userExists = _authService.currentUser != null;
-
     return AlertDialog(
-      title: const Text('Đăng ký để nhận dự báo thời tiết hàng ngày'),
+      title: Text(
+        _isSubscribed
+            ? "Cancel registration"
+            : "Sign up to receive daily weather forecasts",
+      ),
       content: SingleChildScrollView(
-        child: Column(
-          children: [
-            const Text('Nhập email và mật khẩu để đăng ký tài khoản.'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Email',
-                hintText: 'VD: email@example.com',
+        child: _isSubscribed
+            ? const Text("You have signed up to receive information. Click Cancel to stop.")
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text("Enter email and password to register an account.Enter email and password to register an account."),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Email',
+                      hintText: 'VD: email@example.com',
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _passwordController,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Password',
+                    ),
+                    obscureText: true,
+                  ),
+                ],
               ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Mật khẩu',
-              ),
-              obscureText: true,
-            ),
-          ],
-        ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Hủy'),
+          child: const Text("Close"),
         ),
-        if (userExists)
+        if (_isSubscribed)
           TextButton(
             onPressed: _cancelSubscription,
-            child: const Text('Hủy đăng ký'),
+            child: const Text("Cancel registration"),
+          )
+        else
+          ElevatedButton(
+            onPressed: _signUp,
+            child: const Text("Sign up"),
           ),
-        ElevatedButton(
-          onPressed: _signUp,
-          child: const Text('Đăng ký'),
-        ),
       ],
     );
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:web_forecast_weather/models/forecast_info.dart';
@@ -31,10 +30,10 @@ class ForecastCard extends StatelessWidget {
             ),
           ),
           Image.network(
-    "https:${forecast.condition.icon}", 
-    width: 36,
-    height: 36,
-  ),
+            "https:${forecast.condition.icon}",
+            width: 36,
+            height: 36,
+          ),
           Text(
             "Temp: ${forecast.tempC}°C",
             style: const TextStyle(color: Colors.white70, fontSize: 12),

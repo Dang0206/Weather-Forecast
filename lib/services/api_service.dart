@@ -21,7 +21,7 @@ class WeatherService {
     } else {
       final errorData = json.decode(response.body);
       final errorMessage =
-          errorData['error']['message'] ?? 'Không thể tải dữ liệu thời tiết';
+          errorData['error']['message'] ?? 'Unable to load weather data';
       throw Exception(errorMessage);
     }
   }
@@ -43,7 +43,7 @@ class WeatherService {
     } else {
       final errorData = json.decode(response.body);
       final errorMessage =
-          errorData['error']['message'] ?? 'Không thể tải dữ liệu thời tiết';
+          errorData['error']['message'] ?? 'Unable to load weather data';
       throw Exception(errorMessage);
     }
   }
@@ -57,11 +57,7 @@ class WeatherService {
       final List<dynamic> jsonList = json.decode(response.body);
       return jsonList.cast<Map<String, dynamic>>();
     } else {
-      throw Exception('Không thể tìm kiếm thành phố');
+      throw Exception('Unable to search city');
     }
   }
 }
-
-
-
-

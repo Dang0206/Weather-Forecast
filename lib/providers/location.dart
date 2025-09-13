@@ -4,10 +4,8 @@ import 'package:web_forecast_weather/services/api_service.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class WeatherProvider with ChangeNotifier {
   final WeatherService _service = WeatherService();
-
 
   ForecastInfo? _currentWeather;
   List<ForecastInfo> _forecastList = [];
@@ -15,12 +13,12 @@ class WeatherProvider with ChangeNotifier {
   String? _error;
   String? _selectedCity;
 
-  // 🔹 Lịch sử tìm kiếm (trong ngày)
   final List<SearchHistoryItem> _searchHistory = [];
-  List<SearchHistoryItem> get searchHistory => List.unmodifiable(_searchHistory);
+  List<SearchHistoryItem> get searchHistory =>
+      List.unmodifiable(_searchHistory);
 
   WeatherProvider() {
-    _loadHistory(); 
+    _loadHistory();
   }
 
   ForecastInfo? get currentWeather => _currentWeather;
@@ -29,13 +27,11 @@ class WeatherProvider with ChangeNotifier {
   String? get error => _error;
   String? get selectedCity => _selectedCity;
 
- 
   void selectCity(String city) {
     _selectedCity = city;
     fetchWeather(city);
     notifyListeners();
   }
-
 
   Future<void> fetchWeather(String city) async {
     _isLoading = true;
@@ -51,14 +47,13 @@ class WeatherProvider with ChangeNotifier {
           .map((json) => ForecastInfo.fromForecastJson(json))
           .toList();
 
-      // 🔹 Lưu vào lịch sử
       if (_currentWeather != null) {
         final item = SearchHistoryItem(
           city: _selectedCity ?? "Unknown",
           weather: _currentWeather!,
         );
         _searchHistory.add(item);
-        _saveHistory(); // lưu xuống local
+        _saveHistory();
       }
     } catch (e) {
       _error = e.toString();
@@ -68,9 +63,6 @@ class WeatherProvider with ChangeNotifier {
     notifyListeners();
   }
 
-
-
-  /// 🔹 Lưu lịch sử vào SharedPreferences
   Future<void> _saveHistory() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -83,7 +75,6 @@ class WeatherProvider with ChangeNotifier {
     await prefs.setString("search_history", jsonEncode(historyJson));
   }
 
-  /// 🔹 Load lịch sử khi mở app
   Future<void> _loadHistory() async {
     final prefs = await SharedPreferences.getInstance();
     final savedDate = prefs.getString("history_date");
@@ -99,7 +90,6 @@ class WeatherProvider with ChangeNotifier {
         decoded.map((e) => SearchHistoryItem.fromJson(e)),
       );
     } else {
-      // ngày mới → reset
       _searchHistory.clear();
       await prefs.remove("search_history");
     }
@@ -131,5 +121,3 @@ class SearchHistoryItem {
     );
   }
 }
-
-

@@ -7,9 +7,9 @@ import 'package:web_forecast_weather/responsive/tablet_body.dart';
 import 'package:web_forecast_weather/responsive/mobile_body.dart';
 import 'package:web_forecast_weather/responsive/responsive_layout.dart';
 import 'package:firebase_core/firebase_core.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
 
   await Firebase.initializeApp(
     options: const FirebaseOptions(
@@ -23,7 +23,7 @@ Future<void> main() async {
     ),
   );
 
-runApp(
+  runApp(
     ChangeNotifierProvider(
       create: (context) => WeatherProvider(),
       child: const MyApp(),

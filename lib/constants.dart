@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'package:web_forecast_weather/models/location_item.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:web_forecast_weather/providers/location.dart';
 import 'package:web_forecast_weather/services/api_service.dart';
-
-
 
 var defaultBackgroundColor = const Color.fromARGB(255, 181, 213, 239);
 var appBarColor = Colors.blue[900];
@@ -20,20 +17,14 @@ var myAppBar = AppBar(
     ),
   ),
   centerTitle: true,
-
 );
-
-
-
-
 
 var tilePadding = const EdgeInsets.only(left: 8.0, right: 8, top: 8);
 
-
-
-
 class MyDrawer extends StatefulWidget {
-  const MyDrawer({Key? key, required Null Function(dynamic city) onCitySelected}) : super(key: key);
+  const MyDrawer(
+      {Key? key, required Null Function(dynamic city) onCitySelected})
+      : super(key: key);
 
   @override
   State<MyDrawer> createState() => _MyDrawerState();
@@ -119,7 +110,7 @@ class _MyDrawerState extends State<MyDrawer> {
                   child: ElevatedButton(
                     onPressed: _onSearch,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 9, 42, 142),
+                      backgroundColor:  Colors.blue[900],
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -159,9 +150,7 @@ class _MyDrawerState extends State<MyDrawer> {
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // TODO: gọi fetchWeatherByCoordinates
-                    },
+                    onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 63, 61, 61),
                       shape: RoundedRectangleBorder(
@@ -187,17 +176,15 @@ class _MyDrawerState extends State<MyDrawer> {
                       itemBuilder: (context, index) {
                         final item = _results[index];
 
-
-return ListTile(
-  leading: const Icon(Icons.location_city),
-  title: Text("${item.name}, ${item.country}"),
-  subtitle: Text(item.region),
-  onTap: () {
-    
-    Provider.of<WeatherProvider>(context, listen: false).selectCity(item.name);
-  },
-);
-
+                        return ListTile(
+                          leading: const Icon(Icons.location_city),
+                          title: Text("${item.name}, ${item.country}"),
+                          subtitle: Text(item.region),
+                          onTap: () {
+                            Provider.of<WeatherProvider>(context, listen: false)
+                                .selectCity(item.name);
+                          },
+                        );
                       },
                     ),
                   ),
@@ -209,5 +196,3 @@ return ListTile(
     );
   }
 }
-
-

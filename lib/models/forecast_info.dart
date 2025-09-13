@@ -1,7 +1,4 @@
-
-import 'package:flutter/material.dart';
 import 'package:web_forecast_weather/models/weather_condition.dart';
-
 
 class ForecastInfo {
   final String? date;
@@ -39,12 +36,10 @@ class ForecastInfo {
 
   Map<String, dynamic> toJsonFromCurrent() {
     return {
-      // Include all the same fields used in fromCurrentJson
       'temp_c': tempC,
       'condition': condition.toJson(),
       'wind_kph': windKph,
       'humidity': humidity,
-      // Add any other fields as needed
     };
   }
 }
