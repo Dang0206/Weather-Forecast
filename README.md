@@ -33,7 +33,7 @@ API Provider: WeatherAPI
 
 State Management: Provider
 
-Temporary weather history is stored locally using SharedPreferences.
+Temporary weather history is stored using SharedPreferences.
 
 Authentication/Subscription: Firebase Authentication 
 
